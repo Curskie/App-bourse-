@@ -2,160 +2,425 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Investing Pilot Private</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investing Pilot Private | Ultimate Pro</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; }
-        .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; }
-        .btn-blue { background: #2563eb; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; padding: 15px; }
-        input, select { background: #1e293b; border: 1px solid #334155; color: white; padding: 12px; border-radius: 6px; width: 100%; margin-bottom: 15px; }
-        .hidden { display: none; }
+        :root {
+            --bg: #050505;
+            --card: #0c0c0c;
+            --border: #1a1a1a;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .glass {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .input-pro {
+            background: #121212;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-pro:focus { border-color: var(--accent); }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            color: #71717a;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #161616;
+            color: white;
+        }
+
+        .blur-mode .val-secret {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #assetModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.4s ease forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Table Scroll */
+        .table-container::-webkit-scrollbar { height: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="min-h-screen">
 
-    <header class="flex justify-between items-center mb-8">
-        <h1 class="text-xl font-bold text-blue-500 uppercase tracking-tighter">Investing Pilot Private</h1>
-        <button onclick="openForm()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold text-sm">
-            + AJOUTER
-        </button>
-    </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-center">
-        <div class="card border-l-4 border-blue-500">
-            <p class="text-xs text-gray-400 uppercase">Patrimoine Total</p>
-            <h2 id="totalDisplay" class="text-3xl font-black mt-2">0,00 €</h2>
-        </div>
-        <div class="card border-l-4 border-green-500">
-            <p class="text-xs text-gray-400 uppercase">DCA Mensuel</p>
-            <h2 id="dcaDisplay" class="text-3xl font-black mt-2 text-green-400">0,00 €</h2>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3 class="font-bold mb-4 border-b border-slate-700 pb-2">Mes Investissements</h3>
-        <div id="assetsList" class="space-y-4">
-            <p class="text-gray-500 italic text-sm py-4">Aucun actif. Cliquez sur Ajouter.</p>
-        </div>
-    </div>
-
-    <div id="modal">
-        <div class="bg-[#0f172a] p-6 rounded-xl w-full max-w-md border border-blue-500/30">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-bold uppercase">Nouvel Actif</h2>
-                <button onclick="closeForm()" class="text-gray-400">Fermer</button>
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <aside class="w-full lg:w-72 bg-[#080808] border-r border-[#1a1a1a] p-6 flex flex-col gap-8 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+                    <i class="fas fa-crown text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-extrabold tracking-tighter uppercase">Investing Pilot</h1>
+                    <span class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold">PRO EDITION</span>
+                </div>
             </div>
-            
-            <form id="investForm">
-                <label class="text-xs text-gray-400 uppercase font-bold">Nom de l'actif</label>
-                <input type="text" id="nom" placeholder="Ex: S&P 500 ou BTC" required>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs text-gray-400 uppercase font-bold">DCA (€/mois)</label>
-                        <input type="number" id="dca" value="0" step="any">
+            <nav class="flex-grow space-y-2">
+                <button onclick="switchTab('dashboard')" class="sidebar-item active" id="btn-dashboard">
+                    <i class="fas fa-home"></i> <span class="font-semibold text-sm">Vue d'ensemble</span>
+                </button>
+                <button onclick="switchTab('portfolio')" class="sidebar-item" id="btn-portfolio">
+                    <i class="fas fa-wallet"></i> <span class="font-semibold text-sm">Mon Portefeuille</span>
+                </button>
+                <button onclick="switchTab('analytics')" class="sidebar-item" id="btn-analytics">
+                    <i class="fas fa-chart-pie"></i> <span class="font-semibold text-sm">Analyses & ISIN</span>
+                </button>
+                
+                <div class="pt-8 pb-2">
+                    <p class="text-[10px] text-zinc-600 font-black uppercase tracking-widest px-3">Outils</p>
+                </div>
+                <button onclick="togglePrivacy()" class="sidebar-item">
+                    <i class="fas fa-low-vision"></i> <span class="font-semibold text-sm">Mode Discret</span>
+                </button>
+                <button onclick="exportData()" class="sidebar-item">
+                    <i class="fas fa-file-export"></i> <span class="font-semibold text-sm">Exporter (.json)</span>
+                </button>
+            </nav>
+
+            <div class="p-4 glass bg-blue-500/5 border-blue-500/10">
+                <p class="text-[10px] text-blue-500 font-bold mb-2 tracking-widest uppercase">Sécurité</p>
+                <p class="text-[11px] text-zinc-400">Toutes vos données sont stockées localement sur ce navigateur.</p>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-4 lg:p-10 relative">
+            
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div>
+                    <h2 id="pageTitle" class="text-3xl font-extrabold">Tableau de bord</h2>
+                    <p class="text-zinc-500 text-sm mt-1">Analyse temps réel de vos actifs.</p>
+                </div>
+                <div class="flex gap-4 w-full md:w-auto">
+                    <button onclick="openModal()" class="btn-gradient flex-grow md:flex-initial px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-plus-circle"></i> AJOUTER UN ACTIF
+                    </button>
+                </div>
+            </header>
+
+            <div id="tab-dashboard" class="tab-panel active">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="glass p-8 relative overflow-hidden">
+                        <p class="text-zinc-500 text-[11px] font-black uppercase tracking-widest">Patrimoine Net</p>
+                        <h3 id="statTotal" class="text-4xl font-black mt-4 val-secret tabular-nums">0,00 €</h3>
+                        <div id="perfBadge" class="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-zinc-900">
+                           -- %
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs text-gray-400 uppercase font-bold">Valeur Actuelle (€)</label>
-                        <input type="number" id="valeur" placeholder="0.00" step="any" required>
+                    <div class="glass p-8">
+                        <p class="text-zinc-500 text-[11px] font-black uppercase tracking-widest">DCA Mensuel Global</p>
+                        <h3 id="statDCA" class="text-4xl font-black mt-4 text-blue-500 val-secret tabular-nums">0,00 €</h3>
+                        <p class="text-zinc-500 text-xs mt-4">Automatisé vers 0 positions</p>
+                    </div>
+                    <div class="glass p-8 flex items-center justify-center">
+                        <canvas id="miniChart" style="max-height: 100px;"></canvas>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-blue mt-4">SAUVEGARDER</button>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass p-8">
+                        <h4 class="font-bold mb-8 text-sm uppercase tracking-widest text-zinc-400">Répartition stratégique</h4>
+                        <div class="h-64">
+                            <canvas id="mainDonut"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-8">
+                        <h4 class="font-bold mb-8 text-sm uppercase tracking-widest text-zinc-400">Top Performance</h4>
+                        <div id="topAssets" class="space-y-4">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-portfolio" class="tab-panel">
+                <div class="glass overflow-hidden table-container overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-[#121212] border-b border-[#1a1a1a]">
+                            <tr class="text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+                                <th class="p-6">Actif / ISIN</th>
+                                <th class="p-6 text-center">Catégorie</th>
+                                <th class="p-6 text-right">PRU Total</th>
+                                <th class="p-6 text-right">Valeur Actuelle</th>
+                                <th class="p-6 text-center">Plus-Value</th>
+                                <th class="p-6 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetTableBody" class="divide-y divide-[#1a1a1a]">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-analytics" class="tab-panel text-center py-20">
+                <div class="max-w-md mx-auto">
+                    <i class="fas fa-microchip text-5xl text-zinc-800 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-4">Intelligence ISIN</h3>
+                    <p class="text-zinc-500 text-sm mb-8">Cette section analyse automatiquement les codes ISIN pour extraire les frais de gestion et le risque. (Fonctionnalité en cours de déploiement).</p>
+                    <div class="glass p-6 text-left">
+                        <p class="text-xs font-bold text-blue-500 mb-2 uppercase">Aide mémoire</p>
+                        <ul class="text-xs text-zinc-400 space-y-2">
+                            <li>• MSCI World : FR0010315770</li>
+                            <li>• S&P 500 : LU1681048804</li>
+                            <li>• Bitcoin : BTC-USD</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="assetModal" onclick="checkClose(event)">
+        <div class="glass w-full max-w-2xl p-10 relative shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-10">
+                <h3 class="text-2xl font-black">Nouvel Actif Pro</h3>
+                <button onclick="closeModal()" class="text-zinc-500 hover:text-white transition">
+                    <i class="fas fa-times-circle text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="proForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Désignation de l'actif</label>
+                    <input type="text" id="f_name" placeholder="Ex: LVMH, Amundi World, Bitcoin..." class="input-pro" required>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Code ISIN / Ticker</label>
+                    <input type="text" id="f_isin" placeholder="Ex: FR0000121014" class="input-pro">
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Catégorie</label>
+                    <select id="f_cat" class="input-pro">
+                        <option value="Bourse">Actions / ETF</option>
+                        <option value="Crypto">Crypto-monnaie</option>
+                        <option value="Immo">Immobilier</option>
+                        <option value="Cash">Cash / Livrets</option>
+                        <option value="Autre">Autres actifs</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Montant DCA (€/mois)</label>
+                    <input type="number" id="f_dca" value="0" step="any" class="input-pro">
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Valeur Actuelle (€)</label>
+                    <input type="number" id="f_curr" placeholder="0.00" step="any" class="input-pro" required>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-2 mb-2 block">Total Investi (PRU Total en €)</label>
+                    <input type="number" id="f_pru" placeholder="Combien avez-vous injecté au total ?" step="any" class="input-pro" required>
+                </div>
+
+                <div class="md:col-span-2 pt-6">
+                    <button type="submit" class="w-full btn-gradient py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
+                        Enregistrer dans le patrimoine
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Diagnostic : On vérifie que le script se lance
-        console.log("Script Investing Pilot chargé.");
+        let portfolio = JSON.parse(localStorage.getItem('ip_ultra_pro_vault')) || [];
+        let mainChart = null;
+        let miniChart = null;
 
-        // Charger les données
-        let data = JSON.parse(localStorage.getItem('ip_v3_data')) || [];
-
-        function openForm() {
-            document.getElementById('modal').style.display = 'flex';
+        // NAVIGATION
+        function switchTab(id) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            
+            document.getElementById('tab-' + id).classList.add('active');
+            document.getElementById('btn-' + id).classList.add('active');
+            document.getElementById('pageTitle').innerText = id === 'dashboard' ? "Vue d'ensemble" : (id === 'portfolio' ? "Mon Portefeuille" : "Analyses");
         }
 
-        function closeForm() {
-            document.getElementById('modal').style.display = 'none';
+        // MODALE
+        function openModal() { document.getElementById('assetModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('assetModal').style.display = 'none'; }
+        function checkClose(e) { if(e.target.id === 'assetModal') closeModal(); }
+
+        // PRIVACY
+        function togglePrivacy() {
+            document.body.classList.toggle('blur-mode');
         }
 
-        // Action de sauvegarde
-        document.getElementById('investForm').onsubmit = function(e) {
+        // FORMULAIRE
+        document.getElementById('proForm').onsubmit = function(e) {
             e.preventDefault();
             
-            try {
-                const nouvelActif = {
-                    id: Date.now(),
-                    nom: document.getElementById('nom').value,
-                    dca: parseFloat(document.getElementById('dca').value) || 0,
-                    valeur: parseFloat(document.getElementById('valeur').value) || 0
-                };
+            const asset = {
+                id: Date.now(),
+                name: document.getElementById('f_name').value,
+                isin: document.getElementById('f_isin').value || '---',
+                cat: document.getElementById('f_cat').value,
+                dca: parseFloat(document.getElementById('f_dca').value) || 0,
+                pru: parseFloat(document.getElementById('f_pru').value) || 0,
+                curr: parseFloat(document.getElementById('f_curr').value) || 0
+            };
 
-                data.push(nouvelActif);
-                localStorage.setItem('ip_v3_data', JSON.stringify(data));
-                
-                render();
-                closeForm();
-                this.reset();
-                alert("Actif ajouté avec succès !");
-            } catch (err) {
-                alert("Erreur lors de l'ajout : " + err);
-            }
+            portfolio.push(asset);
+            save();
+            closeModal();
+            this.reset();
+            render();
         };
 
-        function deleteItem(id) {
-            if(confirm("Supprimer ?")) {
-                data = data.filter(i => i.id !== id);
-                localStorage.setItem('ip_v3_data', JSON.stringify(data));
+        function deleteAsset(id) {
+            if(confirm("Supprimer définitivement cet actif ?")) {
+                portfolio = portfolio.filter(a => a.id !== id);
+                save();
                 render();
             }
         }
 
+        function save() {
+            localStorage.setItem('ip_ultra_pro_vault', JSON.stringify(portfolio));
+        }
+
+        // RENDU
         function render() {
-            const list = document.getElementById('assetsList');
-            const totalDisplay = document.getElementById('totalDisplay');
-            const dcaDisplay = document.getElementById('dcaDisplay');
+            const table = document.getElementById('assetTableBody');
+            const topList = document.getElementById('topAssets');
+            
+            let totalVal = 0;
+            let totalPru = 0;
+            let totalDca = 0;
+            let categories = {};
 
-            if (data.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 italic text-sm py-4">Aucun actif. Cliquez sur Ajouter.</p>';
-                totalDisplay.innerText = "0,00 €";
-                dcaDisplay.innerText = "0,00 €";
-                return;
-            }
+            table.innerHTML = "";
+            
+            portfolio.forEach(a => {
+                totalVal += a.curr;
+                totalPru += a.pru;
+                totalDca += a.dca;
+                categories[a.cat] = (categories[a.cat] || 0) + a.curr;
 
-            let total = 0;
-            let dcaTotal = 0;
-            list.innerHTML = "";
+                const gain = a.curr - a.pru;
+                const perf = a.pru > 0 ? ((gain / a.pru) * 100).toFixed(2) : 0;
+                const perfColor = gain >= 0 ? 'text-emerald-500' : 'text-red-500';
 
-            data.forEach(item => {
-                total += item.valeur;
-                dcaTotal += item.dca;
-
-                list.innerHTML += `
-                    <div class="flex justify-between items-center p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                        <div>
-                            <div class="font-bold text-blue-300">${item.nom}</div>
-                            <div class="text-[10px] text-gray-500 uppercase">DCA: ${item.dca} €/mois</div>
-                        </div>
-                        <div class="text-right flex items-center gap-4">
-                            <span class="font-black">${item.valeur.toLocaleString()} €</span>
-                            <button onclick="deleteItem(${item.id})" class="text-red-900 text-xs">✕</button>
-                        </div>
-                    </div>
+                table.innerHTML += `
+                    <tr class="hover:bg-white/5 transition group">
+                        <td class="p-6">
+                            <div class="font-bold text-sm text-white">${a.name}</div>
+                            <div class="text-[10px] font-mono text-zinc-600">${a.isin}</div>
+                        </td>
+                        <td class="p-6 text-center">
+                            <span class="text-[9px] px-2 py-1 bg-zinc-900 border border-zinc-800 rounded font-black text-zinc-500 uppercase">${a.cat}</span>
+                        </td>
+                        <td class="p-6 text-right font-medium text-zinc-400 val-secret">${a.pru.toLocaleString()} €</td>
+                        <td class="p-6 text-right font-black text-white val-secret">${a.curr.toLocaleString()} €</td>
+                        <td class="p-6 text-center">
+                            <div class="${perfColor} font-black text-xs">${gain >= 0 ? '+' : ''}${perf}%</div>
+                            <div class="text-[9px] text-zinc-600 val-secret">${gain.toLocaleString()} €</div>
+                        </td>
+                        <td class="p-6 text-center">
+                            <button onclick="deleteAsset(${a.id})" class="text-zinc-800 hover:text-red-500 transition px-3"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
                 `;
             });
 
-            totalDisplay.innerText = total.toLocaleString() + " €";
-            dcaDisplay.innerText = dcaTotal.toLocaleString() + " €";
+            // Update Stats
+            document.getElementById('statTotal').innerText = totalVal.toLocaleString('fr-FR', {style: 'currency', currency: 'EUR'});
+            document.getElementById('statDCA').innerText = totalDca.toLocaleString('fr-FR', {style: 'currency', currency: 'EUR'});
+            
+            const globalGain = totalVal - totalPru;
+            const globalPerf = totalPru > 0 ? ((globalGain / totalPru) * 100).toFixed(2) : 0;
+            const badge = document.getElementById('perfBadge');
+            badge.innerText = (globalGain >= 0 ? '↗ ' : '↘ ') + globalPerf + '%';
+            badge.className = `mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${globalGain >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`;
+
+            renderTopPerformers();
+            updateCharts(categories);
         }
 
-        // Lancement initial
-        render();
-    </script>
-</body>
-</html>
+        function renderTopPerformers() {
+            const container = document.getElementById('topAssets');
+            const sorted = [...portfolio].sort((a,b) => (b.curr - b.pru) - (a.curr - a.pru)).slice(0, 3);
+            
+            container.innerHTML = sorted.length ? sorted.map(a => `
+                <div class="flex justify-between items-center p-4 bg-zinc-900/40 rounded-xl border border-zinc-800/50">
+                    <span class="text-xs font-bold">${a.name}</span>
+                    <span class="text-xs font-black text-emerald-500">+${(((a.curr - a.pru)/a.pru)*100).toFixed(1)}%</span>
+                </div>
+            `).join('') : '<p class="text-zinc-600 text-xs italic">Pas assez de données.</p>';
+        }
 
+        function updateCharts(cats) {
+            const ctx = document.getElementById('mainDonut').getContext('2d');
+            const mCtx = document.getElementById('miniChart').getContext('2d');
+
+            const data = {
+                labels: Object.keys(cats),
+                datasets: [{
+  
