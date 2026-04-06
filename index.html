@@ -1,1 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finary Private Elite | Portfolio Manager</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        :root {
+            --bg-main: #05070a;
+            --bg-card: #0f111a;
+            --bg-input: #161923;
+            --accent: #3d5afe;
+            --accent-gradient: linear-gradient(135deg, #3d5afe 0%, #6366f1 100%);
+            --border: #1e2230;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .finary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .finary-card:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-glow {
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 15px rgba(61, 90, 254, 0.3);
+        }
+
+        .input-finary {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-finary:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(61, 90, 254, 0.2);
+        }
+
+        .tab-active {
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+
+        /* Chart Tooltip Custom */
+        #chartjs-tooltip {
+            background: rgba(15, 17, 26, 0.95) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="p-0 m-0">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <aside class="w-full lg:w-72 bg-[#080a10] border-r border-gray-800 p-6 flex flex-col z-50">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-10 h-10 btn-glow rounded-xl flex items-center justify-center">
+                    <i class="fas fa-vault text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tighter italic">FINARY<span class="text-blue-500">PRIVATE</span></h1>
+            </div>
+
+            <nav class="space-y-2 flex-grow">
+                <a href="#" onclick="switchTab('dashboard')" class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white group">
+                    <i class="fas fa-th-large w-5 text-lg group-hover:text-blue-400"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="#" onclick="switchTab('assets')" class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white group">
+                    <i class="fas fa-wallet w-5 text-lg group-hover:text-blue-400"></i>
+                    <span class="font-medium">Mes Actifs</span>
+                </a>
+                <a href="#" onclick="switchTab('dca')" class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white group">
+                    <i class="fas fa-calendar-alt w-5 text-lg group-hover:text-blue-400"></i>
+                    <span class="font-medium">Plan DCA</span>
+                </a>
+                <a href="#" onclick="switchTab('history')" class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white group">
+                    <i class="fas fa-history w-5 text-lg group-hover:text-blue-400"></i>
+                    <span class="font-medium">Historique</span>
+                </a>
+                <div class="pt-6 pb-2 px-3">
+                    <span class="text-xs uppercase text-gray-600 font-bold tracking-widest">Réglages</span>
+                </div>
+                <a href="#" onclick="exportData()" class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white">
+                    <i class="fas fa-download w-5"></i>
+                    <span class="font-medium">Exporter (JSON)</span>
+                </a>
+                <label class="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition text-gray-400 hover:text-white cursor-pointer">
+                    <i class="fas fa-upload w-5"></i>
+                    <span class="font-medium">Importer</span>
+                    <input type="file" id="importFile" class="hidden" onchange="importData(event)">
+                </label>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-gray-800">
+                <div class="finary-card p-4 bg-gradient-to-br from-blue-900/20 to-transparent">
+                    <p class="text-xs text-blue-300 font-bold mb-1 uppercase">Objectif Liberté</p>
+                    <div class="w-full bg-gray-800 h-1.5 rounded-full mb-2">
+                        <div id="goalProgress" class="bg-blue-500 h-full rounded-full" style="width: 35%"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 italic text-center">35% de votre objectif atteint</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-4 lg:p-8">
+            
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 id="pageTitle" class="text-2xl font-bold">Tableau de bord</h2>
+                    <p class="text-gray-500 text-sm">Bienvenue sur votre gestionnaire de patrimoine personnel.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="openModal('assetModal')" class="btn-glow px-5 py-2.5 rounded-xl font-bold flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Ajouter un actif
+                    </button>
+                    <div class="h-10 w-10 rounded-full border border-gray-700 flex items-center justify-center bg-gray-900">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div id="section-dashboard" class="animate-fade">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="finary-card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500"><i class="fas fa-chart-pie"></i></div>
+                            <span class="text-xs font-bold text-gray-500">PATRIMOINE NET</span>
+                        </div>
+                        <h3 id="statNetWealth" class="text-2xl font-black tabular-nums">0.00 €</h3>
+                        <p id="statNetPerf" class="text-sm mt-2 font-semibold">--</p>
+                    </div>
+                    <div class="finary-card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500"><i class="fas fa-arrow-trend-up"></i></div>
+                            <span class="text-xs font-bold text-gray-500">INVESTISSEMENTS</span>
+                        </div>
+                        <h3 id="statTotalInvested" class="text-2xl font-black tabular-nums">0.00 €</h3>
+                        <p class="text-sm mt-2 text-gray-500">Capital injecté total</p>
+                    </div>
+                    <div class="finary-card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-orange-500/10 rounded-lg text-orange-500"><i class="fas fa-coins"></i></div>
+                            <span class="text-xs font-bold text-gray-500">DCA MENSUEL</span>
+                        </div>
+                        <h3 id="statMonthlyDCA" class="text-2xl font-black tabular-nums">0.00 €</h3>
+                        <p class="text-sm mt-2 text-gray-500">Engagement programmé</p>
+                    </div>
+                    <div class="finary-card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-purple-500/10 rounded-lg text-purple-500"><i class="fas fa-landmark"></i></div>
+                            <span class="text-xs font-bold text-gray-500">PLUS-VALUE LATENTE</span>
+                        </div>
+                        <h3 id="statGlobalGain" class="text-2xl font-black tabular-nums">0.00 €</h3>
+                        <p id="statGlobalGainPerc" class="text-sm mt-2 font-semibold">--</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="finary-card p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="font-bold">Analyse de la performance historique</h4>
+                            <div class="flex gap-2">
+                                <button class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-400">1M</button>
+                                <button class="text-xs bg-blue-600 px-3 py-1 rounded text-white">YTD</button>
+                                <button class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-400">ALL</button>
+                            </div>
+                        </div>
+                        <div class="h-80 w-full">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="finary-card p-6">
+                        <h4 class="font-bold mb-6">Allocation par classe d'actifs</h4>
+                        <div class="h-64 w-full flex items-center justify-center">
+                            <canvas id="allocationDonutChart"></canvas>
+                        </div>
+                        <div id="allocationLegend" class="mt-6 space-y-3">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="finary-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-bold">Top Positions</h4>
+                        <a href="#" onclick="switchTab('assets')" class="text-blue-500 text-sm font-semibold hover:underline">Voir tout</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-gray-500 text-xs uppercase tracking-widest border-b border-gray-800">
+                                    <th class="pb-4">Actif</th>
+                                    <th class="pb-4">Catégorie</th>
+                                    <th class="pb-4 text-right">Prix Actuel</th>
+                                    <th class="pb-4 text-right">Allocation</th>
+                                    <th class="pb-4 text-right">Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topAssetsTable" class="divide-y divide-gray-800/50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-assets" class="hidden animate-fade">
+                <div class="finary-card overflow-hidden">
+                    <div class="p-6 border-b border-gray-800 bg-gray-900/30 flex flex-wrap justify-between items-center gap-4">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                            <input type="text" id="assetSearch" oninput="filterAssets()" placeholder="Rechercher un actif..." class="input-finary pl-10 w-64">
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="filterCategory" onchange="filterAssets()" class="input-finary text-sm">
+                                <option value="all">Toutes les catégories</option>
+                                <option value="Bourse">Bourse</option>
+                                <option value="Crypto">Crypto</option>
+                                <option value="Immobilier">Immobilier</option>
+                                <option value="Cash">Cash / Livrets</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-800/20 text-gray-400 text-xs uppercase font-bold">
+                                <tr>
+                                    <th class="px-6 py-4">Nom de l'actif</th>
+                                    <th class="px-6 py-4">Type</th>
+                                    <th class="px-6 py-4 text-right">PRU (€)</th>
+                                    <th class="px-6 py-4 text-right">Actuel (€)</th>
+                                    <th class="px-6 py-4 text-right">Quantité</th>
+                                    <th class="px-6 py-4 text-right">Total</th>
+                                    <th class="px-6 py-4 text-right">Plus-value</th>
+                                    <th class="px-6 py-4 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fullAssetTable" class="divide-y divide-gray-800">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-dca" class="hidden animate-fade">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="finary-card p-6">
+                        <h4 class="text-xl font-bold mb-6">Calculateur de stratégie DCA</h4>
+                        <div class="space-y-6">
+                            <div id="dcaList" class="space-y-4">
+                                </div>
+                            <div class="pt-6 border-t border-gray-800">
+                                <div class="flex justify-between items-center text-lg font-bold">
+                                    <span>Total mensuel programmé :</span>
+                                    <span id="dcaTotalCalc" class="text-blue-500">0.00 €</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="finary-card p-6 bg-gradient-to-br from-gray-900 to-blue-900/10">
+                        <h4 class="text-xl font-bold mb-4 italic"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Optimisation du portefeuille</h4>
+                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Selon votre stratégie actuelle, vous concentrez 78% de vos investissements sur le secteur technologique (S&P 500). 
+                            Pour réduire votre risque, envisagez de renforcer vos lignes Immobilier ou Emerging Markets lors des prochains versements.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-black/40 rounded-xl border border-gray-800">
+                                <p class="text-xs text-gray-500 uppercase font-bold mb-2">Recommandation du mois</p>
+                                <p class="text-sm">Renforcez <strong>Coface</strong> (+30€) pour profiter du rendement actuel.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-history" class="hidden animate-fade">
+                <div class="finary-card p-8 text-center">
+                    <i class="fas fa-clock-rotate-left text-5xl text-gray-700 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Historique des transactions</h3>
+                    <p class="text-gray-500 max-w-md mx-auto">Cette fonctionnalité sera alimentée au fur et à mesure de vos ajouts d'actifs. Vous pourrez bientôt voir l'évolution de chaque ligne individuellement.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="assetModal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="finary-card w-full max-w-xl bg-[#0f111a] p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold">Nouvel Actif</h3>
+                <button onclick="closeModal('assetModal')" class="text-gray-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <form id="mainAssetForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nom de l'investissement</label>
+                        <input type="text" id="f_name" required placeholder="Ex: Apple, Bitcoin, Appartement Paris..." class="input-finary w-full">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Catégorie</label>
+                        <select id="f_cat" class="input-finary w-full">
+                            <option value="Bourse">Bourse (Actions/ETF)</option>
+                            <option value="Crypto">Crypto-actifs</option>
+                            <option value="Immobilier">Immobilier</option>
+                            <option value="Cash">Cash & Livrets</option>
+                            <option value="Autre">Autres (Or, Montres...)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">DCA Mensuel (€)</label>
+                        <input type="number" id="f_dca" value
