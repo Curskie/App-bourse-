@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investing Pilot Private | Zero-Bug Pro</title>
+    <title>Investing Pilot | Multi-Stratégie Pro</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,27 +12,17 @@
 
     <style>
         :root { --bg: #050505; --card: #0c0c0c; --border: #1a1a1a; --accent: #3b82f6; }
-        body { background-color: var(--bg); color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
         .btn-gradient { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); cursor: pointer; transition: 0.2s; }
-        .btn-gradient:hover { opacity: 0.9; transform: translateY(-1px); }
         .input-pro { background: #121212; border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: white; width: 100%; outline: none; }
-        .input-pro:focus { border-color: var(--accent); }
         .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #71717a; width: 100%; transition: 0.2s; }
         .sidebar-item.active { background: #161616; color: white; }
-        .val-secret { transition: 0.3s; }
         .blur-mode .val-secret { filter: blur(8px); }
 
-        /* MODALE ULTRA-STABLE */
         #assetModal {
-            display: none; 
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 99999; 
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
+            z-index: 99999; align-items: center; justify-content: center; padding: 20px;
         }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
@@ -44,25 +34,25 @@
         
         <aside class="w-full lg:w-72 bg-[#080808] border-r border-[#1a1a1a] p-6 flex flex-col gap-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center">
-                    <i class="fas fa-crown text-white"></i>
+                <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i class="fas fa-chart-line text-white"></i>
                 </div>
-                <h1 class="text-sm font-extrabold uppercase leading-tight">Investing Pilot <br><span class="text-blue-500 text-[10px]">PRO EDITION</span></h1>
+                <h1 class="text-sm font-extrabold uppercase">Investing Pilot <br><span class="text-blue-500 text-[10px]">STRATÉGIE PRO</span></h1>
             </div>
 
             <nav class="flex-grow space-y-2">
                 <button onclick="switchTab('dashboard')" class="sidebar-item active" id="btn-dashboard">
-                    <i class="fas fa-home"></i> <span class="font-semibold text-sm">Vue d'ensemble</span>
+                    <i class="fas fa-th-large"></i> <span class="font-semibold text-sm">Dashboard</span>
                 </button>
                 <button onclick="switchTab('portfolio')" class="sidebar-item" id="btn-portfolio">
-                    <i class="fas fa-wallet"></i> <span class="font-semibold text-sm">Mon Portefeuille</span>
+                    <i class="fas fa-layer-group"></i> <span class="font-semibold text-sm">Portefeuille</span>
                 </button>
                 <div class="h-px bg-zinc-900 my-4"></div>
                 <button onclick="togglePrivacy()" class="sidebar-item">
                     <i class="fas fa-eye-slash"></i> <span class="font-semibold text-sm">Mode Discret</span>
                 </button>
                 <button onclick="exportData()" class="sidebar-item">
-                    <i class="fas fa-file-export"></i> <span class="font-semibold text-sm">Sauvegarder (.json)</span>
+                    <i class="fas fa-download"></i> <span class="font-semibold text-sm">Backup (.json)</span>
                 </button>
             </nav>
         </aside>
@@ -71,34 +61,39 @@
             
             <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
                 <div>
-                    <h2 id="pageTitle" class="text-3xl font-extrabold tracking-tight">Tableau de bord</h2>
-                    <p class="text-zinc-500 text-sm">Performance en temps réel</p>
+                    <h2 id="pageTitle" class="text-3xl font-extrabold">Vue d'ensemble</h2>
+                    <p class="text-zinc-500 text-sm">Analyse Socle vs Actions</p>
                 </div>
                 <button onclick="openModal()" class="btn-gradient px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-plus-circle"></i> AJOUTER UN ACTIF
+                    <i class="fas fa-plus-circle"></i> NOUVEL ACTIF
                 </button>
             </header>
 
             <div id="tab-dashboard" class="tab-panel active">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                    <div class="glass p-8 border-l-4 border-blue-500">
-                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Valeur Portfolio</p>
-                        <h3 id="statTotal" class="text-4xl font-black mt-4 val-secret">0,00 €</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="glass p-8 border-t-2 border-blue-500">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Valeur Totale</p>
+                        <h3 id="statTotal" class="text-3xl font-black mt-4 val-secret">0,00 €</h3>
                     </div>
-                    <div class="glass p-8 border-l-4 border-emerald-500">
-                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">DCA Mensuel</p>
-                        <h3 id="statDCA" class="text-4xl font-black mt-4 text-emerald-400 val-secret">0,00 €</h3>
+                    <div class="glass p-8 border-t-2 border-emerald-500">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">DCA Mensuel (Socle)</p>
+                        <h3 id="statDCA" class="text-3xl font-black mt-4 text-emerald-400 val-secret">0,00 €</h3>
+                    </div>
+                    <div class="glass p-8 border-t-2 border-orange-500">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Performance Moyenne</p>
+                        <h3 id="statPerf" class="text-3xl font-black mt-4 val-secret">-- %</h3>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="glass p-8 flex flex-col items-center min-h-[350px]">
-                        <h4 class="w-full font-bold mb-8 text-sm uppercase text-zinc-500">Répartition Actifs</h4>
+                        <h4 class="w-full font-bold mb-8 text-sm uppercase text-zinc-500">Répartition par Stratégie</h4>
                         <div class="flex-grow w-full relative">
                             <canvas id="mainDonut"></canvas>
                         </div>
                     </div>
                     <div class="glass p-8">
-                        <h4 class="font-bold mb-6 text-sm uppercase text-zinc-500">Classement Positions</h4>
+                        <h4 class="font-bold mb-6 text-sm uppercase text-zinc-500">Derniers Mouvements</h4>
                         <div id="topAssets" class="space-y-3"></div>
                     </div>
                 </div>
@@ -109,10 +104,10 @@
                     <table class="w-full text-left">
                         <thead class="bg-[#121212] border-b border-[#1a1a1a]">
                             <tr class="text-[10px] text-zinc-500 uppercase font-black tracking-widest">
-                                <th class="p-6">Actif / ISIN</th>
-                                <th class="p-6 text-center">Type</th>
-                                <th class="p-6 text-right">Valeur</th>
-                                <th class="p-6 text-center">Perf. (%)</th>
+                                <th class="p-6">Nom / ISIN</th>
+                                <th class="p-6 text-center">Stratégie</th>
+                                <th class="p-6 text-right">Position</th>
+                                <th class="p-6 text-center">Plus-Value</th>
                                 <th class="p-6 text-center">Action</th>
                             </tr>
                         </thead>
@@ -126,27 +121,25 @@
     <div id="assetModal">
         <div class="glass w-full max-w-lg p-8 relative shadow-2xl">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-black uppercase tracking-tighter">Nouvel Investissement</h3>
+                <h3 class="text-xl font-black uppercase tracking-tighter">Ajouter au Patrimoine</h3>
                 <button onclick="closeModal()" class="text-zinc-500 hover:text-white text-3xl font-light">&times;</button>
             </div>
 
             <form id="secureForm" class="space-y-5">
                 <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Nom ou Code ISIN</label>
-                    <input type="text" id="f_name" placeholder="Ex: FR0000121014 ou Bitcoin" class="input-pro" required>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Désignation</label>
+                    <input type="text" id="f_name" placeholder="Ex: LVMH ou ETF World" class="input-pro" required>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Type</label>
-                        <select id="f_cat" class="input-pro">
-                            <option value="Bourse">Bourse</option>
-                            <option value="Crypto">Crypto</option>
-                            <option value="Immo">Immo</option>
-                            <option value="Cash">Cash</option>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Stratégie</label>
+                        <select id="f_strat" class="input-pro" onchange="toggleDcaField()">
+                            <option value="DCA">DCA (Socle)</option>
+                            <option value="Action">Action (Ponctuel)</option>
                         </select>
                     </div>
-                    <div>
+                    <div id="dca_field">
                         <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">DCA (€/mois)</label>
                         <input type="text" id="f_dca" value="0" class="input-pro">
                     </div>
@@ -154,103 +147,106 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Prix de Revient (€)</label>
-                        <input type="text" id="f_pru" placeholder="Total investi" class="input-pro" required>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Montant Investi (PRU)</label>
+                        <input type="text" id="f_pru" placeholder="Total €" class="input-pro" required>
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Valeur Actuelle (€)</label>
-                        <input type="text" id="f_curr" placeholder="Valeur marché" class="input-pro" required>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Valeur Actuelle</label>
+                        <input type="text" id="f_curr" placeholder="Valeur €" class="input-pro" required>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full btn-gradient py-4 rounded-xl font-black text-sm uppercase tracking-widest mt-4">
-                    Enregistrer dans le portfolio
+                <button type="submit" class="w-full btn-gradient py-4 rounded-xl font-black text-sm uppercase tracking-widest mt-4 shadow-lg shadow-blue-500/20">
+                    Valider la position
                 </button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- CORE LOGIC ---
-        let portfolio = JSON.parse(localStorage.getItem('ip_vfinal_db')) || [];
+        let portfolio = JSON.parse(localStorage.getItem('ip_strat_vault')) || [];
         let mainChart = null;
 
         function openModal() { document.getElementById('assetModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('assetModal').style.display = 'none'; }
         function togglePrivacy() { document.body.classList.toggle('blur-mode'); }
+        
+        function toggleDcaField() {
+            const strat = document.getElementById('f_strat').value;
+            const field = document.getElementById('dca_field');
+            if (strat === 'Action') {
+                field.style.opacity = '0.3';
+                document.getElementById('f_dca').value = '0';
+                document.getElementById('f_dca').disabled = true;
+            } else {
+                field.style.opacity = '1';
+                document.getElementById('f_dca').disabled = false;
+            }
+        }
 
         function switchTab(id) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
             document.getElementById('btn-' + id).classList.add('active');
-            document.getElementById('pageTitle').innerText = (id === 'dashboard') ? "Vue d'ensemble" : "Mon Portefeuille";
         }
 
-        // --- SAUVEGARDE SÉCURISÉE ---
         document.getElementById('secureForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            console.log("Tentative d'enregistrement...");
+            const parseNum = (val) => parseFloat(val.toString().replace(',', '.')) || 0;
 
-            try {
-                // Nettoyage des nombres (remplace virgule par point)
-                const parseNum = (val) => parseFloat(val.toString().replace(',', '.')) || 0;
+            const newAsset = {
+                id: Date.now(),
+                name: document.getElementById('f_name').value,
+                strat: document.getElementById('f_strat').value,
+                dca: parseNum(document.getElementById('f_dca').value),
+                pru: parseNum(document.getElementById('f_pru').value),
+                curr: parseNum(document.getElementById('f_curr').value)
+            };
 
-                const newAsset = {
-                    id: Date.now(),
-                    name: document.getElementById('f_name').value,
-                    cat: document.getElementById('f_cat').value,
-                    dca: parseNum(document.getElementById('f_dca').value),
-                    pru: parseNum(document.getElementById('f_pru').value),
-                    curr: parseNum(document.getElementById('f_curr').value)
-                };
-
-                portfolio.push(newAsset);
-                localStorage.setItem('ip_vfinal_db', JSON.stringify(portfolio));
-                
-                closeModal();
-                this.reset();
-                render();
-                console.log("Enregistré avec succès !");
-            } catch (err) {
-                console.error("Erreur de saisie:", err);
-                alert("Erreur dans les montants saisis.");
-            }
+            portfolio.push(newAsset);
+            localStorage.setItem('ip_strat_vault', JSON.stringify(portfolio));
+            closeModal();
+            this.reset();
+            render();
         });
 
         function deleteAsset(id) {
-            if(confirm("Confirmer la suppression ?")) {
+            if(confirm("Supprimer ?")) {
                 portfolio = portfolio.filter(a => a.id !== id);
-                localStorage.setItem('ip_vfinal_db', JSON.stringify(portfolio));
+                localStorage.setItem('ip_strat_vault', JSON.stringify(portfolio));
                 render();
             }
         }
 
-        // --- MOTEUR DE RENDU ---
         function render() {
             const table = document.getElementById('assetTableBody');
             const topList = document.getElementById('topAssets');
-            let totalVal = 0, totalDca = 0;
-            let cats = {};
+            let totalVal = 0, totalDca = 0, totalPru = 0;
+            let stratData = { 'DCA': 0, 'Action': 0 };
 
-            table.innerHTML = "";
-            topList.innerHTML = "";
+            table.innerHTML = ""; topList.innerHTML = "";
             
             portfolio.forEach(a => {
                 totalVal += a.curr;
-                totalDca += a.dca;
-                cats[a.cat] = (cats[a.cat] || 0) + a.curr;
+                totalPru += a.pru;
+                totalDca += (a.strat === 'DCA' ? a.dca : 0);
+                stratData[a.strat] += a.curr;
 
                 const gain = a.curr - a.pru;
-                const perf = a.pru > 0 ? ((gain / a.pru) * 100).toFixed(2) : 0;
-                const color = gain >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const perf = a.pru > 0 ? ((gain / a.pru) * 100).toFixed(1) : 0;
+                const badgeColor = a.strat === 'DCA' ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400';
 
                 table.innerHTML += `
                     <tr class="hover:bg-white/5 transition">
                         <td class="p-6 font-bold text-sm">${a.name}</td>
-                        <td class="p-6 text-center text-[10px] text-zinc-500 font-bold uppercase">${a.cat}</td>
+                        <td class="p-6 text-center">
+                            <span class="text-[9px] px-2 py-1 rounded font-black uppercase ${badgeColor}">${a.strat}</span>
+                        </td>
                         <td class="p-6 text-right font-black val-secret">${a.curr.toLocaleString()} €</td>
-                        <td class="p-6 text-center font-bold text-xs ${color}">${gain >= 0 ? '+' : ''}${perf}%</td>
+                        <td class="p-6 text-center font-bold text-xs ${gain >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                            ${gain >= 0 ? '+' : ''}${perf}%
+                        </td>
                         <td class="p-6 text-center">
                             <button onclick="deleteAsset(${a.id})" class="text-zinc-800 hover:text-red-500 transition px-2"><i class="fas fa-trash"></i></button>
                         </td>
@@ -260,28 +256,25 @@
 
             document.getElementById('statTotal').innerText = totalVal.toLocaleString() + " €";
             document.getElementById('statDCA').innerText = totalDca.toLocaleString() + " €";
+            const globalPerf = totalPru > 0 ? (((totalVal - totalPru) / totalPru) * 100).toFixed(1) : 0;
+            document.getElementById('statPerf').innerText = (globalPerf >= 0 ? '+' : '') + globalPerf + "%";
+            document.getElementById('statPerf').className = `text-3xl font-black mt-4 val-secret ${globalPerf >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
 
-            // Chart Update
+            // Chart
             const ctx = document.getElementById('mainDonut').getContext('2d');
             if(mainChart) mainChart.destroy();
-            if(portfolio.length > 0) {
-                mainChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(cats),
-                        datasets: [{ data: Object.values(cats), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899'], borderWidth: 0 }]
-                    },
-                    options: { cutout: '80%', plugins: { legend: { display: false } }, maintainAspectRatio: false }
-                });
-            }
+            mainChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Socle (DCA)', 'Actions (Ponctuel)'],
+                    datasets: [{ data: [stratData['DCA'], stratData['Action']], backgroundColor: ['#3b82f6', '#f97316'], borderWidth: 0 }]
+                },
+                options: { cutout: '80%', plugins: { legend: { display: false } }, maintainAspectRatio: false }
+            });
 
-            // Top List
-            [...portfolio].sort((a,b) => b.curr - a.curr).slice(0,4).forEach(a => {
-                topList.innerHTML += `
-                    <div class="flex justify-between items-center p-4 bg-zinc-900 rounded-xl border border-zinc-800">
-                        <span class="text-xs font-bold">${a.name}</span>
-                        <span class="font-black text-xs val-secret">${a.curr.toLocaleString()} €</span>
-                    </div>`;
+            // Recent
+            portfolio.slice(-4).reverse().forEach(a => {
+                topList.innerHTML += `<div class="flex justify-between p-4 bg-zinc-900 rounded-xl border border-zinc-800"><span class="text-xs font-bold">${a.name}</span><span class="font-black text-xs text-blue-500">${a.curr.toLocaleString()} €</span></div>`;
             });
         }
 
@@ -289,7 +282,7 @@
             const blob = new Blob([JSON.stringify(portfolio)], {type: 'application/json'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'investing_pilot_backup.json';
+            a.download = 'investing_pilot_strat.json';
             a.click();
         }
 
