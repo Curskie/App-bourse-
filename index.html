@@ -3,267 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investing Pilot | Quantité & Parts Pro</title>
+    <title>Investing Pilot | Finary Pro Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --bg: #050505; --card: #0c0c0c; --border: #1a1a1a; --accent: #3b82f6; }
-        body { background-color: var(--bg); color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
-        .btn-gradient { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); cursor: pointer; transition: 0.2s; }
-        .input-pro { background: #121212; border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: white; width: 100%; outline: none; }
-        .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #71717a; width: 100%; transition: 0.2s; }
-        .sidebar-item.active { background: #161616; color: white; }
-        .blur-mode .val-secret { filter: blur(8px); }
-
-        #assetModal {
-            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
-            z-index: 99999; align-items: center; justify-content: center; padding: 20px;
+        :root { --bg: #030303; --card: #0a0a0a; --border: #161616; --accent: #3b82f6; --success: #10b981; }
+        body { background-color: var(--bg); color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.02em; }
+        .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
+        .btn-pro { background: #ffffff; color: #000; font-weight: 800; transition: 0.2s; border-radius: 12px; }
+        .btn-pro:hover { opacity: 0.9; transform: scale(1.02); }
+        .input-pro { background: #111; border: 1px solid #222; border-radius: 12px; padding: 12px; color: white; width: 100%; outline: none; }
+        .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; color: #71717a; transition: 0.2s; cursor: pointer; }
+        .sidebar-item.active { background: #111; color: white; border: 1px solid #222; }
+        .blur-mode .val-secret { filter: blur(10px); pointer-events: none; }
+        
+        #mainModal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(5px);
         }
-        .tab-panel { display: none; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
         .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div class="flex flex-col lg:flex-row min-h-screen">
-        
-        <aside class="w-full lg:w-72 bg-[#080808] border-r border-[#1a1a1a] p-6 flex flex-col gap-8">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center">
-                    <i class="fas fa-chart-pie text-white"></i>
+        <aside class="w-full lg:w-72 border-r border-[#161616] p-6 flex flex-col gap-10 bg-[#050505]">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-white text-xs"></i>
                 </div>
-                <h1 class="text-sm font-extrabold uppercase">Investing Pilot <br><span class="text-blue-500 text-[10px]">QUANTITÉ PRO</span></h1>
+                <span class="font-extrabold text-lg tracking-tighter">INVESTING <span class="text-blue-500">PRO</span></span>
             </div>
 
-            <nav class="flex-grow space-y-2">
-                <button onclick="switchTab('dashboard')" class="sidebar-item active" id="btn-dashboard">
-                    <i class="fas fa-home"></i> <span class="font-semibold text-sm">Dashboard</span>
-                </button>
-                <button onclick="switchTab('portfolio')" class="sidebar-item" id="btn-portfolio">
-                    <i class="fas fa-list"></i> <span class="font-semibold text-sm">Portefeuille</span>
-                </button>
-                <div class="h-px bg-zinc-900 my-4"></div>
-                <button onclick="togglePrivacy()" class="sidebar-item">
-                    <i class="fas fa-eye-slash"></i> <span class="font-semibold text-sm">Mode Discret</span>
-                </button>
+            <nav class="space-y-1">
+                <div onclick="switchTab('dashboard')" class="sidebar-item active" id="nav-dashboard">
+                    <i class="fas fa-home"></i> <span class="text-sm font-bold">Synthèse</span>
+                </div>
+                <div onclick="switchTab('assets')" class="sidebar-item" id="nav-assets">
+                    <i class="fas fa-wallet"></i> <span class="text-sm font-bold">Actifs & Parts</span>
+                </div>
+                <div onclick="switchTab('analysis')" class="sidebar-item" id="nav-analysis">
+                    <i class="fas fa-microchip"></i> <span class="text-sm font-bold">Analyses IA</span>
+                </div>
+                <div class="pt-6 pb-2 text-[10px] font-black text-zinc-600 uppercase tracking-widest px-4">Paramètres</div>
+                <div onclick="togglePrivacy()" class="sidebar-item">
+                    <i class="fas fa-low-vision"></i> <span class="text-sm font-bold">Mode Discret</span>
+                </div>
             </nav>
+
+            <div class="mt-auto glass p-5 bg-blue-500/5 border-blue-500/10">
+                <p class="text-[10px] font-black text-blue-500 uppercase">Abonnement</p>
+                <p class="text-xs font-bold mt-1">Plan Ultra Illimité</p>
+            </div>
         </aside>
 
-        <main class="flex-grow p-4 lg:p-10">
-            <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+        <main class="flex-grow p-6 lg:p-12">
+            
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
                 <div>
-                    <h2 id="pageTitle" class="text-3xl font-extrabold">Patrimoine</h2>
-                    <p class="text-zinc-500 text-sm">Suivi précis des parts détenues</p>
+                    <h2 class="text-zinc-500 text-xs font-black uppercase tracking-widest">Patrimoine Net</h2>
+                    <div class="flex items-baseline gap-4">
+                        <h1 id="totalNet" class="text-5xl font-black val-secret tabular-nums">0,00 €</h1>
+                        <span id="globalPerf" class="text-sm font-bold px-2 py-1 rounded bg-zinc-900">--%</span>
+                    </div>
                 </div>
-                <button onclick="openModal()" class="btn-gradient px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2">
-                    <i class="fas fa-plus-circle"></i> AJOUTER UN ACTIF
-                </button>
-            </header>
+                <div class="flex gap-3">
+                    <button onclick="openModal()" class="btn-pro px-6 py-3 text-sm uppercase tracking-tighter">Ajouter un actif</button>
+                </div>
+            </div>
 
             <div id="tab-dashboard" class="tab-panel active">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                    <div class="glass p-8 border-l-4 border-blue-500">
-                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Valeur Totale</p>
-                        <h3 id="statTotal" class="text-4xl font-black mt-2 val-secret">0,00 €</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="glass p-6">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase">Brut (Possédé)</p>
+                        <p id="statBrut" class="text-2xl font-bold mt-2 val-secret">0 €</p>
                     </div>
-                    <div class="glass p-8 border-l-4 border-emerald-500">
-                        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest">DCA Mensuel</p>
-                        <h3 id="statDCA" class="text-4xl font-black mt-2 text-emerald-400 val-secret">0,00 €</h3>
+                    <div class="glass p-6">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase">Financier (Bourse/Crypto)</p>
+                        <p id="statFin" class="text-2xl font-bold mt-2 val-secret text-blue-400">0 €</p>
+                    </div>
+                    <div class="glass p-6">
+                        <p class="text-zinc-500 text-[10px] font-black uppercase">Passif (Dettes)</p>
+                        <p id="statDette" class="text-2xl font-bold mt-2 val-secret text-red-400">0 €</p>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass p-8 flex flex-col items-center">
-                        <h4 class="w-full font-bold mb-8 text-sm text-zinc-500 uppercase">Répartition Stratégique</h4>
-                        <canvas id="mainDonut" style="max-height: 250px;"></canvas>
+                    <div class="glass p-8">
+                        <h3 class="font-black text-sm uppercase mb-8 text-zinc-500">Allocation d'actifs</h3>
+                        <div class="h-[300px]"><canvas id="chartAllocation"></canvas></div>
                     </div>
                     <div class="glass p-8">
-                        <h4 class="font-bold mb-6 text-sm text-zinc-500 uppercase">Mes plus grosses lignes</h4>
-                        <div id="topAssets" class="space-y-3"></div>
+                        <h3 class="font-black text-sm uppercase mb-8 text-zinc-500">Dernières Performances</h3>
+                        <div id="topPerformers" class="space-y-4"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-portfolio" class="tab-panel">
-                <div class="glass overflow-x-auto">
+            <div id="tab-assets" class="tab-panel">
+                <div class="glass overflow-hidden overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-[#121212] border-b border-[#1a1a1a]">
-                            <tr class="text-[10px] text-zinc-500 uppercase font-black">
-                                <th class="p-6">Actif / Stratégie</th>
-                                <th class="p-6 text-center">Quantité (Parts)</th>
-                                <th class="p-6 text-right">Valeur Totale</th>
-                                <th class="p-6 text-center">Perf. globale</th>
-                                <th class="p-6 text-center">Action</th>
+                        <thead class="bg-[#0f0f0f] border-b border-[#161616]">
+                            <tr class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                                <th class="p-6">Actif</th>
+                                <th class="p-6">Classe</th>
+                                <th class="p-6 text-right">Parts</th>
+                                <th class="p-6 text-right">Valeur Actuelle</th>
+                                <th class="p-6 text-center">Performance</th>
+                                <th class="p-6"></th>
                             </tr>
                         </thead>
-                        <tbody id="assetTableBody" class="divide-y divide-[#1a1a1a]"></tbody>
+                        <tbody id="assetTable" class="divide-y divide-[#161616]"></tbody>
                     </table>
                 </div>
             </div>
+
+            <div id="tab-analysis" class="tab-panel">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass p-8">
+                        <i class="fas fa-shield-alt text-blue-500 mb-4 text-2xl"></i>
+                        <h3 class="text-xl font-bold mb-2">Score de Diversification</h3>
+                        <p class="text-zinc-500 text-sm mb-6">Analyse de la corrélation entre vos lignes Bourse et Crypto.</p>
+                        <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden">
+                            <div id="divScore" class="bg-blue-500 h-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="glass p-8">
+                        <i class="fas fa-hourglass-half text-orange-500 mb-4 text-2xl"></i>
+                        <h3 class="text-xl font-bold mb-2">Projection à 10 ans</h3>
+                        <p class="text-zinc-500 text-sm mb-4">Basé sur votre DCA actuel et une performance de 7%/an.</p>
+                        <p id="projection" class="text-3xl font-black text-orange-400">0 €</p>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <div id="assetModal">
-        <div class="glass w-full max-w-lg p-8 relative">
+    <div id="mainModal">
+        <div class="glass w-full max-w-xl p-8 relative shadow-2xl bg-[#0a0a0a]">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-black uppercase">Nouvelle Position</h3>
-                <button onclick="closeModal()" class="text-zinc-500 hover:text-white text-3xl">&times;</button>
+                <h3 class="text-2xl font-black tracking-tighter">AJOUTER AU PATRIMOINE</h3>
+                <button onclick="closeModal()" class="text-zinc-600 hover:text-white text-3xl">&times;</button>
             </div>
 
-            <form id="partsForm" class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Nom de l'actif</label>
-                    <input type="text" id="f_name" placeholder="Ex: LVMH ou ETF World" class="input-pro" required>
-                </div>
-                
+            <form id="proForm" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Nom de l'actif / Banque / ISIN</label>
+                        <input type="text" id="f_name" class="input-pro" placeholder="Ex: Trade Republic, LVMH, Résidence..." required>
+                    </div>
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Stratégie</label>
-                        <select id="f_strat" class="input-pro" onchange="updateUI()">
-                            <option value="DCA">DCA (Socle)</option>
-                            <option value="Action">Action (Ponctuel)</option>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Classe d'actif</label>
+                        <select id="f_class" class="input-pro">
+                            <option value="Financier">Actions / ETF</option>
+                            <option value="Crypto">Cryptomonnaies</option>
+                            <option value="Immo">Immobilier</option>
+                            <option value="Cash">Cash / Livrets</option>
+                            <option value="Dette">Passif / Emprunt</option>
                         </select>
                     </div>
-                    <div id="dca_wrap">
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">DCA (€/mois)</label>
-                        <input type="text" id="f_dca" value="0" class="input-pro">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Nombre de parts</label>
-                        <input type="text" id="f_qty" placeholder="Ex: 12.5" class="input-pro" required>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Type</label>
+                        <select id="f_strat" class="input-pro">
+                            <option value="DCA">DCA Mensuel</option>
+                            <option value="Action">Achat Unique</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Prix actuel d'une part</label>
-                        <input type="text" id="f_price" placeholder="Ex: 192.50" class="input-pro" required>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Parts détenues</label>
+                        <input type="text" id="f_qty" class="input-pro" value="1">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Prix Unitaire Actuel</label>
+                        <input type="text" id="f_price" class="input-pro" placeholder="0.00">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">Total Investi (PRU Total)</label>
+                        <input type="text" id="f_pru" class="input-pro" placeholder="Montant injecté en €">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black text-zinc-500 uppercase">DCA Mensuel (€)</label>
+                        <input type="text" id="f_dca" class="input-pro" value="0">
                     </div>
                 </div>
-
-                <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase block mb-1">Total investi au total (PRU)</label>
-                    <input type="text" id="f_pru" placeholder="Montant total injecté en €" class="input-pro" required>
-                </div>
-
-                <button type="submit" class="w-full btn-gradient py-4 rounded-xl font-black text-sm uppercase mt-4">
-                    Sauvegarder la position
-                </button>
+                <button type="submit" class="w-full btn-pro py-4 mt-4 uppercase">Confirmer l'ajout</button>
             </form>
         </div>
     </div>
 
     <script>
-        let portfolio = JSON.parse(localStorage.getItem('ip_qty_vault')) || [];
-        let mainChart = null;
+        let vault = JSON.parse(localStorage.getItem('finary_pro_vault')) || [];
+        let allocChart = null;
 
-        function openModal() { document.getElementById('assetModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('assetModal').style.display = 'none'; }
+        function openModal() { document.getElementById('mainModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('mainModal').style.display = 'none'; }
         function togglePrivacy() { document.body.classList.toggle('blur-mode'); }
         
-        function updateUI() {
-            const isAction = document.getElementById('f_strat').value === 'Action';
-            document.getElementById('f_dca').disabled = isAction;
-            document.getElementById('dca_wrap').style.opacity = isAction ? '0.3' : '1';
-        }
-
         function switchTab(id) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
-            document.getElementById('btn-' + id).classList.add('active');
+            document.getElementById('nav-' + id).classList.add('active');
         }
 
-        document.getElementById('partsForm').onsubmit = function(e) {
+        document.getElementById('proForm').onsubmit = function(e) {
             e.preventDefault();
-            const parseNum = (v) => parseFloat(v.toString().replace(',', '.')) || 0;
-
-            const qty = parseNum(document.getElementById('f_qty').value);
-            const price = parseNum(document.getElementById('f_price').value);
-
+            const parseN = (v) => parseFloat(v.toString().replace(',', '.')) || 0;
+            const price = parseN(document.getElementById('f_price').value);
+            const qty = parseN(document.getElementById('f_qty').value);
+            
             const asset = {
                 id: Date.now(),
                 name: document.getElementById('f_name').value,
+                class: document.getElementById('f_class').value,
                 strat: document.getElementById('f_strat').value,
-                dca: parseNum(document.getElementById('f_dca').value),
                 qty: qty,
                 price: price,
-                curr: qty * price, // Calcul automatique de la valeur actuelle
-                pru: parseNum(document.getElementById('f_pru').value)
+                curr: qty * price,
+                pru: parseN(document.getElementById('f_pru').value),
+                dca: parseN(document.getElementById('f_dca').value)
             };
 
-            portfolio.push(asset);
-            localStorage.setItem('ip_qty_vault', JSON.stringify(portfolio));
-            closeModal();
-            this.reset();
-            render();
+            vault.push(asset);
+            localStorage.setItem('finary_pro_vault', JSON.stringify(vault));
+            this.reset(); closeModal(); render();
         };
 
         function deleteAsset(id) {
-            if(confirm("Supprimer ?")) {
-                portfolio = portfolio.filter(a => a.id !== id);
-                localStorage.setItem('ip_qty_vault', JSON.stringify(portfolio));
+            if(confirm("Supprimer cet actif ?")) {
+                vault = vault.filter(a => a.id !== id);
+                localStorage.setItem('finary_pro_vault', JSON.stringify(vault));
                 render();
             }
         }
 
         function render() {
-            const table = document.getElementById('assetTableBody');
-            const topList = document.getElementById('topAssets');
-            let totalVal = 0, totalDca = 0, totalPru = 0;
-            let strats = { 'DCA': 0, 'Action': 0 };
+            const table = document.getElementById('assetTable');
+            const topList = document.getElementById('topPerformers');
+            let brut = 0, financier = 0, dette = 0, totalDca = 0, totalPru = 0;
+            let classes = { 'Financier': 0, 'Crypto': 0, 'Immo': 0, 'Cash': 0 };
 
             table.innerHTML = ""; topList.innerHTML = "";
-            
-            portfolio.forEach(a => {
-                totalVal += a.curr;
-                totalPru += a.pru;
-                totalDca += (a.strat === 'DCA' ? a.dca : 0);
-                strats[a.strat] += a.curr;
+
+            vault.forEach(a => {
+                if(a.class === 'Dette') {
+                    dette += a.curr;
+                } else {
+                    brut += a.curr;
+                    totalPru += a.pru;
+                    totalDca += a.dca;
+                    classes[a.class] = (classes[a.class] || 0) + a.curr;
+                    if(a.class === 'Financier' || a.class === 'Crypto') financier += a.curr;
+                }
 
                 const gain = a.curr - a.pru;
                 const perf = a.pru > 0 ? ((gain / a.pru) * 100).toFixed(1) : 0;
 
                 table.innerHTML += `
-                    <tr class="hover:bg-white/5 transition">
-                        <td class="p-6">
-                            <div class="font-bold text-sm text-white">${a.name}</div>
-                            <div class="text-[9px] text-blue-500 font-bold uppercase">${a.strat}</div>
-                        </td>
-                        <td class="p-6 text-center text-zinc-400 font-medium">
-                            ${a.qty} <span class="text-[10px]">parts</span>
-                        </td>
-                        <td class="p-6 text-right font-black val-secret text-white">${a.curr.toLocaleString()} €</td>
-                        <td class="p-6 text-center font-bold text-xs ${gain >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-                            ${gain >= 0 ? '+' : ''}${perf}%
-                        </td>
-                        <td class="p-6 text-center">
-                            <button onclick="deleteAsset(${a.id})" class="text-zinc-800 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                        </td>
+                    <tr class="hover:bg-zinc-900/50 transition">
+                        <td class="p-6 font-bold">${a.name}</td>
+                        <td class="p-6"><span class="text-[9px] px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold uppercase">${a.class}</span></td>
+                        <td class="p-6 text-right text-zinc-400 font-medium">${a.qty}</td>
+                        <td class="p-6 text-right font-black val-secret">${a.curr.toLocaleString()} €</td>
+                        <td class="p-6 text-center font-bold ${gain >= 0 ? 'text-emerald-400' : 'text-red-400'}">${gain >= 0 ? '+' : ''}${perf}%</td>
+                        <td class="p-6 text-right"><button onclick="deleteAsset(${a.id})" class="text-zinc-800 hover:text-red-500"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `;
             });
 
-            document.getElementById('statTotal').innerText = totalVal.toLocaleString() + " €";
-            document.getElementById('statDCA').innerText = totalDca.toLocaleString() + " €";
+            // Update Stats
+            const net = brut - dette;
+            document.getElementById('totalNet').innerText = net.toLocaleString('fr-FR') + " €";
+            document.getElementById('statBrut').innerText = brut.toLocaleString() + " €";
+            document.getElementById('statFin').innerText = financier.toLocaleString() + " €";
+            document.getElementById('statDette').innerText = dette.toLocaleString() + " €";
+            
+            const gPerf = totalPru > 0 ? (((brut - totalPru) / totalPru) * 100).toFixed(1) : 0;
+            document.getElementById('globalPerf').innerText = (gPerf >= 0 ? '+' : '') + gPerf + "%";
+            document.getElementById('globalPerf').className = `text-sm font-bold px-2 py-1 rounded ${gPerf >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`;
 
-            const ctx = document.getElementById('mainDonut').getContext('2d');
-            if(mainChart) mainChart.destroy();
-            mainChart = new Chart(ctx, {
+            // Projection 10 ans (7% moyen)
+            let projValue = net;
+            for(let i=0; i<120; i++) { projValue = (projValue * (1 + 0.07/12)) + totalDca; }
+            document.getElementById('projection').innerText = Math.round(projValue).toLocaleString() + " €";
+
+            // Allocation Chart
+            const ctx = document.getElementById('chartAllocation').getContext('2d');
+            if(allocChart) allocChart.destroy();
+            allocChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Socle DCA', 'Actions Ponctuelles'],
-                    datasets: [{ data: [strats['DCA'], strats['Action']], backgroundColor: ['#3b82f6', '#f97316'], borderWidth: 0 }]
+                    labels: Object.keys(classes),
+                    datasets: [{ data: Object.values(classes), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'], borderWidth: 0 }]
                 },
-                options: { cutout: '80%', plugins: { legend: { display: false } }, maintainAspectRatio: false }
+                options: { cutout: '85%', plugins: { legend: { position: 'bottom', labels: { color: '#71717a', usePointStyle: true, font: { size: 10, weight: '800'} } } }, maintainAspectRatio: false }
             });
 
-            [...portfolio].sort((a,b) => b.curr - a.curr).slice(0,4).forEach(a => {
-                topList.innerHTML += `<div class="flex justify-between p-4 bg-zinc-900 rounded-xl border border-zinc-800"><span class="text-xs font-bold">${a.name}</span><span class="font-black text-xs text-blue-500">${a.curr.toLocaleString()} €</span></div>`;
+            // Top Performers
+            [...vault].filter(a => a.class !== 'Dette').sort((a,b) => (b.curr-b.pru) - (a.curr-a.pru)).slice(0,3).forEach(a => {
+                const perf = a.pru > 0 ? (((a.curr-a.pru)/a.pru)*100).toFixed(1) : 0;
+                topList.innerHTML += `
+                    <div class="flex justify-between items-center p-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-bold">${a.name}</span>
+                        <span class="text-xs font-black text-emerald-400">+${perf}%</span>
+                    </div>`;
             });
         }
 
